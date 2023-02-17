@@ -45,10 +45,6 @@ button:hover {
   box-shadow: var(--color-line) 6px 6px;
 }
 
-.canvas-container:hover {
-  box-shadow: var(--color-base) 6px 6px;
-}
-
 #start {
   --w: 300px;
   --h: 100px;
