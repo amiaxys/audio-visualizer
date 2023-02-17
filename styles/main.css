@@ -52,6 +52,7 @@ button:hover {
   height: var(--h);
   background: var(--color-accent);
   box-shadow: var(--color-bg) 6px 6px;
+  font-size: 1.4em;
 }
 
 #start:disabled {
