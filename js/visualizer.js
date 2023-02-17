@@ -17,7 +17,7 @@
     analyser.connect(distortion);
     distortion.connect(audioCtx.destination);
 
-    analyser.fftSize = 2048;
+    analyser.fftSize = 2048; // must be power of 2
     const bufferLength = analyser.frequencyBinCount;
     const dataArray = new Uint8Array(bufferLength);
 
