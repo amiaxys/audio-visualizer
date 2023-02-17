@@ -4,22 +4,35 @@
     <meta charset="UTF-8" />
     <meta name="description" content="Audio Visualizer" />
     <meta name="author" content="Amy Liang" />
-
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link href="styles/main.css" rel="stylesheet" type="text/css" />
 
     <title>Audio Visualizer</title>
   </head>
 
   <body>
-    <button id="start">Start</button>
+    <header>
+      <h1>Audio Visualizer</h1>
+    </header>
 
-    <canvas id="visualizer" height="550" width="550"></canvas>
+    <div class="main-content">
+      <div class="canvas-container">
+        <button id="start">Start</button>
 
-    <audio
-      controls
-      id="source"
-      src="media/Lunar-Beast-Theme-v7.2_Final.wav"
-    ></audio>
+        <canvas id="visualizer" width="500" height="500"></canvas>
+      </div>
+
+      <audio
+        controls
+        id="source"
+        src="media/Lunar-Beast-Theme-v7.2_Final.wav"
+      ></audio>
+    </div>
+
+    <footer>
+      <a href="credits.html">credits</a>
+    </footer>
 
     <script type="text/javascript" src="js/visualizer.js"></script>
   </body>
