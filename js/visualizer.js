@@ -1,6 +1,7 @@
 (function () {
   "use strict";
-  document.getElementById("start").addEventListener("click", function () {
+  document.getElementById("start").addEventListener("click", function (e) {
+    e.target.disabled = true;
     const canvas = document.getElementById("visualizer");
     const canvasCtx = canvas.getContext("2d");
     const WIDTH = canvas.width;
@@ -26,10 +27,12 @@
     function draw() {
       requestAnimationFrame(draw);
       analyser.getByteTimeDomainData(dataArray);
-      canvasCtx.fillStyle = "rgb(220, 230, 240)";
+
+      const style = getComputedStyle(document.body);
+      canvasCtx.fillStyle = style.getPropertyValue("--color-base");
       canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
       canvasCtx.lineWidth = 2;
-      canvasCtx.strokeStyle = "rgb(200, 100, 50)";
+      canvasCtx.strokeStyle = style.getPropertyValue("--color-line");
       canvasCtx.beginPath();
       const sliceWidth = WIDTH / bufferLength;
       let x = 0;
@@ -49,5 +52,6 @@
       canvasCtx.stroke();
     }
     draw();
+    audioElmt.play();
   });
 })();
