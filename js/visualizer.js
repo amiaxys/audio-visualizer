@@ -21,12 +21,12 @@
   let dataArrayAlt;
   let type = 0;
 
-  canvas.addEventListener("mouseenter", function (e) {
+  document.addEventListener("keydown", function (e) {
     baseColor = style.getPropertyValue("--color-accent");
     lineColor = style.getPropertyValue("--color-bg");
   });
 
-  canvas.addEventListener("mouseleave", function (e) {
+  document.addEventListener("keyup", function (e) {
     baseColor = style.getPropertyValue("--color-base");
     lineColor = style.getPropertyValue("--color-line");
   });
