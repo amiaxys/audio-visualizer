@@ -22,13 +22,13 @@
   let type = 0;
 
   document.addEventListener("keydown", function (e) {
-    baseColor = style.getPropertyValue("--color-accent");
-    lineColor = style.getPropertyValue("--color-bg");
-  });
-
-  document.addEventListener("keyup", function (e) {
-    baseColor = style.getPropertyValue("--color-base");
-    lineColor = style.getPropertyValue("--color-line");
+    if (baseColor === style.getPropertyValue("--color-base")) {
+      baseColor = style.getPropertyValue("--color-accent");
+      lineColor = style.getPropertyValue("--color-bg");
+    } else {
+      baseColor = style.getPropertyValue("--color-base");
+      lineColor = style.getPropertyValue("--color-line");
+    }
   });
 
   function draw() {
@@ -58,7 +58,6 @@
       }
       canvasCtx.lineTo(WIDTH, HEIGHT / 2);
       canvasCtx.stroke();
-
     } else if (type === 1) {
       analyser.getByteFrequencyData(dataArrayAlt);
 
@@ -76,6 +75,19 @@
 
         x += barWidth + 2;
       }
+    } else {
+      analyser.getByteFrequencyData(dataArrayAlt);
+
+      canvasCtx.fillStyle = baseColor;
+      canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+      for (let i = 0; i < bufferLengthAlt; i++) {
+        canvasCtx.lineWidth = 2;
+        canvasCtx.strokeStyle = lineColor;
+        canvasCtx.beginPath();
+        canvasCtx.arc(WIDTH / 2, HEIGHT / 2, dataArrayAlt[i], 0, 2 * Math.PI);
+        canvasCtx.stroke();
+      }
     }
   }
 
@@ -86,7 +98,13 @@
       bufferLengthAlt = analyser.frequencyBinCount;
       dataArrayAlt = new Uint8Array(bufferLengthAlt);
       type = 1;
-    } else {
+    } else if (type === 1) {
+      // for ???
+      analyser.fftSize = 256;
+      bufferLengthAlt = analyser.frequencyBinCount;
+      dataArrayAlt = new Uint8Array(bufferLengthAlt);
+      type = 2;
+    } else if (type == 2) {
       // for wave
       analyser.fftSize = fftSize;
       bufferLength = analyser.frequencyBinCount;
