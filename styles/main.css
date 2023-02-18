@@ -18,7 +18,18 @@ body {
   margin-bottom: 20px;
   display: flex;
   flex-flow: column nowrap;
-  row-gap: 20px;
+  row-gap: 10px;
+}
+
+.info {
+  color: var(--color-accent);
+  font-style: italic;
+  text-align: right;
+}
+
+.info::before {
+  content: "Tip: ";
+  color: var(--color-line);
 }
 
 button {
