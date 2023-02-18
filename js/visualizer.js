@@ -11,15 +11,16 @@
 
   const audioElmt = document.getElementById("source");
 
-  const fftSize = 2048;
-
   let audioCtx;
   let analyser;
   let bufferLength;
   let dataArray;
   let bufferLengthAlt;
   let dataArrayAlt;
+
   let type = 0;
+  let ran;
+  let mouse = { x: 0, y: 0 };
 
   document.addEventListener("keydown", function (e) {
     if (baseColor === style.getPropertyValue("--color-base")) {
@@ -31,85 +32,173 @@
     }
   });
 
-  function draw() {
-    requestAnimationFrame(draw);
-    if (type === 0) {
-      analyser.getByteTimeDomainData(dataArray);
+  canvas.addEventListener("mousemove", function (e) {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+  });
 
-      canvasCtx.fillStyle = baseColor;
-      canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+  function drawWave() {
+    analyser.getByteTimeDomainData(dataArray);
 
-      canvasCtx.lineWidth = 2;
-      canvasCtx.strokeStyle = lineColor;
-      canvasCtx.beginPath();
-      const sliceWidth = WIDTH / bufferLength;
-      let x = 0;
-      for (let i = 0; i < bufferLength; i++) {
-        const v = dataArray[i] / 128.0;
-        const y = v * (HEIGHT / 2);
+    canvasCtx.fillStyle = baseColor;
+    canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
-        if (i === 0) {
-          canvasCtx.moveTo(x, y);
-        } else {
-          canvasCtx.lineTo(x, y);
-        }
+    canvasCtx.lineWidth = 2;
+    canvasCtx.strokeStyle = lineColor;
+    canvasCtx.beginPath();
+    const sliceWidth = WIDTH / bufferLength;
+    let x = 0;
+    for (let i = 0; i < bufferLength; i++) {
+      const v = dataArray[i] / 128.0;
+      const y = v * (HEIGHT / 2);
 
-        x += sliceWidth;
+      if (i === 0) {
+        canvasCtx.moveTo(x, y);
+      } else {
+        canvasCtx.lineTo(x, y);
       }
-      canvasCtx.lineTo(WIDTH, HEIGHT / 2);
-      canvasCtx.stroke();
-    } else if (type === 1) {
-      analyser.getByteFrequencyData(dataArrayAlt);
 
-      canvasCtx.fillStyle = baseColor;
-      canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+      x += sliceWidth;
+    }
+    canvasCtx.lineTo(WIDTH, HEIGHT / 2);
+    canvasCtx.stroke();
+  }
 
-      const barWidth = (WIDTH / bufferLengthAlt) * 2.5;
-      let barHeight;
-      let x = 0;
-      for (let i = 0; i < bufferLengthAlt; i++) {
-        barHeight = dataArrayAlt[i] + 2;
+  function drawBars() {
+    analyser.getByteFrequencyData(dataArrayAlt);
 
-        canvasCtx.fillStyle = lineColor;
-        canvasCtx.fillRect(x, HEIGHT / 2 - barHeight / 2, barWidth, barHeight);
+    canvasCtx.fillStyle = baseColor;
+    canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
 
-        x += barWidth + 2;
-      }
-    } else {
-      analyser.getByteFrequencyData(dataArrayAlt);
-
-      canvasCtx.fillStyle = baseColor;
-      canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
-
-      for (let i = 0; i < bufferLengthAlt; i++) {
-        canvasCtx.lineWidth = 2;
-        canvasCtx.strokeStyle = lineColor;
-        canvasCtx.beginPath();
-        canvasCtx.arc(WIDTH / 2, HEIGHT / 2, dataArrayAlt[i], 0, 2 * Math.PI);
-        canvasCtx.stroke();
-      }
+    const barWidth = (WIDTH / bufferLengthAlt) * 2.5;
+    let barHeight;
+    let x = 0;
+    for (let i = 0; i < bufferLengthAlt; i++) {
+      barHeight = dataArrayAlt[i] + 2;
+      canvasCtx.fillStyle = lineColor;
+      canvasCtx.fillRect(x, HEIGHT / 2 - barHeight / 2, barWidth, barHeight);
+      x += barWidth + 2;
     }
   }
 
+  function drawCircles() {
+    analyser.getByteFrequencyData(dataArrayAlt);
+
+    canvasCtx.fillStyle = baseColor;
+    canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    let x = 0;
+    let radius;
+    for (let i = 0; i < bufferLengthAlt; i++) {
+      canvasCtx.lineWidth = 2;
+      const opacity = Math.floor((255 / Math.max(...ran)) * ran[i]);
+      canvasCtx.fillStyle = lineColor + opacity.toString(16);
+      canvasCtx.beginPath();
+      radius = dataArrayAlt[i] / 3.5;
+      canvasCtx.arc(x, ran[i], radius, 0, 2 * Math.PI);
+      canvasCtx.fill();
+      x += (WIDTH / bufferLengthAlt) * 4;
+    }
+  }
+
+  function drawGradient() {
+    analyser.getByteFrequencyData(dataArrayAlt);
+
+    canvasCtx.fillStyle = baseColor;
+    canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    const avg = dataArrayAlt.reduce((a, b) => a + b) / dataArrayAlt.length;
+    const radius = avg * 2;
+
+    const dist = Math.sqrt(
+      Math.pow(mouse.x - WIDTH / 2, 2) + Math.pow(mouse.y - HEIGHT / 2, 2)
+    );
+
+    let x;
+    let y;
+
+    if (dist <= radius) {
+      x = mouse.x;
+      y = mouse.y;
+    } else {
+      x = mouse.x - WIDTH / 2;
+      y = mouse.y - HEIGHT / 2;
+      const radians = Math.atan2(y, x);
+      x = Math.cos(radians) * radius + WIDTH / 2;
+      y = Math.sin(radians) * radius + HEIGHT / 2;
+    }
+
+    const gradient = canvasCtx.createRadialGradient(
+      x,
+      y,
+      0,
+      WIDTH / 2,
+      HEIGHT / 2,
+      radius + 2
+    );
+
+    gradient.addColorStop(0, lineColor);
+    gradient.addColorStop(0.2, lineColor);
+    gradient.addColorStop(1, baseColor);
+
+    canvasCtx.fillStyle = gradient;
+    canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+  }
+
+  function draw() {
+    requestAnimationFrame(draw);
+    switch (type) {
+      case 0:
+        drawWave();
+        break;
+      case 1:
+        drawBars();
+        break;
+      case 2:
+        drawCircles();
+        break;
+      case 3:
+        drawGradient();
+    }
+  }
+
+  function setAnalyserAlt(num) {
+    analyser.fftSize = num;
+    bufferLengthAlt = analyser.frequencyBinCount;
+    dataArrayAlt = new Uint8Array(bufferLengthAlt);
+  }
+
+  function setAnalyser(num) {
+    analyser.fftSize = num;
+    bufferLength = analyser.frequencyBinCount;
+    dataArray = new Uint8Array(bufferLength);
+  }
+
   canvas.addEventListener("click", function (e) {
-    if (type === 0) {
-      // for bars
-      analyser.fftSize = 256;
-      bufferLengthAlt = analyser.frequencyBinCount;
-      dataArrayAlt = new Uint8Array(bufferLengthAlt);
-      type = 1;
-    } else if (type === 1) {
-      // for ???
-      analyser.fftSize = 256;
-      bufferLengthAlt = analyser.frequencyBinCount;
-      dataArrayAlt = new Uint8Array(bufferLengthAlt);
-      type = 2;
-    } else if (type == 2) {
-      // for wave
-      analyser.fftSize = fftSize;
-      bufferLength = analyser.frequencyBinCount;
-      dataArray = new Uint8Array(bufferLength);
-      type = 0;
+    switch (type) {
+      case 0:
+        // for bars
+        setAnalyserAlt(256);
+        type = 1;
+        break;
+      case 1:
+        // for circles
+        setAnalyserAlt(256);
+        type = 2;
+        ran = Array.from({ length: bufferLengthAlt }, () =>
+          Math.floor(Math.random() * (HEIGHT - 100) + 50)
+        );
+        break;
+      case 2:
+        // for gradient
+        setAnalyserAlt(256);
+        type = 3;
+        break;
+      default:
+        // for wave
+        setAnalyser(2048);
+        type = 0;
     }
     draw();
   });
@@ -126,9 +215,7 @@
     analyser.connect(distortion);
     distortion.connect(audioCtx.destination);
 
-    analyser.fftSize = fftSize; // must be power of 2
-    bufferLength = analyser.frequencyBinCount;
-    dataArray = new Uint8Array(bufferLength);
+    setAnalyser(2048);
 
     //canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
 
