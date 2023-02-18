@@ -56,12 +56,19 @@ button:hover {
   background: var(--color-accent);
   box-shadow: var(--color-bg) 6px 6px;
   font-size: 1.4em;
+  transition: all 0.2s ease-in-out;
 }
 
 #start:hover {
+  --resize: 1.1;
   color: var(--color-accent);
   background: var(--color-line);
   box-shadow: var(--color-accent) 6px 6px;
+  top: calc(50% - (var(--h) * var(--resize) / 2));
+  left: calc(50% - (var(--w) * var(--resize) / 2));
+  width: calc(var(--w) * var(--resize));
+  height: calc(var(--h) * var(--resize));
+  font-size: calc(1.4em * var(--resize) * var(--resize));
 }
 
 #start:disabled {
@@ -76,6 +83,7 @@ button:hover {
 #source {
   margin: auto;
   filter: drop-shadow(6px 6px 0 var(--color-accent));
+  transition: all 0.2s ease-in-out;
 }
 
 #source:hover {
